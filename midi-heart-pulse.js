@@ -1,5 +1,6 @@
 function resetPulsate() {
     var heart = document.querySelector(".heart");
+    heart.classList.add("pulsate");
     var parent = heart.parentElement;
     parent.appendChild(heart);
 }
@@ -16,6 +17,10 @@ if (navigator.requestMIDIAccess) {
 
 function onMIDISuccess(midiAccess) {
     midi = midiAccess;
+
+    var inputs = midi.inputs.values();
+
+
 }
 
 function onMIDIFailure(error) {

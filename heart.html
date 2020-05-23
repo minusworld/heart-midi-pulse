@@ -2,9 +2,11 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="heart.css">
-    <script src="midi-heart-pulse.js"></script>
 </head>
 <body style="background:black">
+    <div>
+        <input type="file" id="midiFile">
+    </div>
     <div>
         <svg xmlns="http://www.w3.org/2000/svg"
             shape-rendering="crispEdges"
@@ -13,12 +15,53 @@
             stroke="red"
             stroke-width="0"
             stroke-opacity="1"
-            class="pulsate heart"
+            class="heart"
             fill="red">
             <path transform="translate(64,64)"
                 onclick="resetPulsate()"
                 d="M2 0h2v1h2v1h1v2h2V2h1V1h2V0h2v1h1v1h1v8h-2v2h-2v2h-2v2H6v-2H4v-2H2v-2H0V2h1V1h1V0z"/>
         </svg>
     </div>
+
+    <script type="text/javascript" src="https://ryoyakawai.github.io/smfplayer/js/smfParser.js"></script>
+    <script type="text/javascript" src="https://ryoyakawai.github.io/smfplayer/js/smfPlayer.js"></script>
+    <script>
+        function resetPulsate() {
+            var heart = document.querySelector(".heart");
+            heart.classList.add("pulsate");
+            var parent = heart.parentElement;
+            parent.appendChild(heart);
+        }
+
+        var fakeMidiOutput = {
+            send:  (midiMessage, delta) => {
+                if (midiMessage[0] == 144) {
+                    resetPulsate();
+                }
+            }
+        }
+        // need this to prevent crash
+        var chInfo=[
+            {"on":true}, {"on":true}, {"on":true}, {"on":true},
+            {"on":true}, {"on":true}, {"on":true}, {"on":true},
+            {"on":true}, {"on":true}, {"on":true}, {"on":true},
+            {"on":true}, {"on":true}, {"on":true}, {"on":true}
+        ];
+
+        document.getElementById("midiFile").addEventListener("change", (event) => {
+            var file = event.target.files[0];
+            var fReader = new FileReader();
+
+            fReader.onload = (event) => {
+                var smfParser = new SmfParser();
+                var midiData = smfParser.parse(event.target.result);
+                var smfPlayer = new SmfPlayer(fakeMidiOutput);
+                smfPlayer.init(midiData, 5000, 0);
+                smfPlayer.startPlay();
+            }
+
+            var fileData = fReader.readAsBinaryString(file);
+        });
+    </script>
 </body>
 </html>
